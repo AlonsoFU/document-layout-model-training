@@ -1,0 +1,7 @@
+{
+  "E_lora32_cosine_aug (ref)": 0.8117,
+  "L_oversample_3x": 0.8129335867638007,
+  "M_oversample_5x": 0.8885751041887409,
+  "N_weighted_loss": 0.8111696914196915,
+  "O_oversample_weighted": 0.8582687135840373
+}

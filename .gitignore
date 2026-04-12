@@ -1,0 +1,37 @@
+# Models (too large for git, except winner)
+training/models/A_*/
+training/models/B_*/
+training/models/C_*/
+training/models/D_*/
+training/models/E_*/
+training/models/F_*/
+training/models/G_*/
+training/models/H_*/
+training/models/I_*/
+training/models/J_*/
+training/models/K_*/
+training/models/L_*/
+training/models/M_*/
+training/models/N_*/
+training/models/O_*/
+# Keep P (winner): training/models/P_repeat_factor/
+
+# All model weights
+training/models/*/best_model.pt
+training/models/*/*.pt
+
+# Results PDFs
+training/resultados/
+
+# COCO outputs
+coco_output/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data split (reproducibility - keep)
+# training/models/data_split.json
+
+# Ground truth (keep)
+# training/EAF-477-2025_ground_truth.json
