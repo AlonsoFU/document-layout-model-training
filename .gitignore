@@ -1,41 +1,42 @@
-# Models (too large for git, except winner)
-training/models/A_*/
-training/models/B_*/
-training/models/C_*/
-training/models/D_*/
-training/models/E_*/
-training/models/F_*/
-training/models/G_*/
-training/models/H_*/
-training/models/I_*/
-training/models/J_*/
-training/models/K_*/
-training/models/L_*/
-training/models/M_*/
-training/models/N_*/
-training/models/O_*/
-# Keep P (winner): training/models/P_repeat_factor/
-
-# All model weights
-training/models/*/best_model.pt
-training/models/*/*.pt
-
-# Results PDFs
-training/resultados/
-
-# COCO outputs
-coco_output/
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Rendered PNGs (regenerate from data/pdfs via scripts/render_pdf_to_png.py)
-cvat_projects/*/images/
+# Virtualenv
+.venv/
+
+# Rendered PNGs (regenerable from data/pdfs/ via `dlmf render`)
+projects/*/data/images/
+
+# CVAT pre-annotations (regenerable via `dlmf predict --pre-annotate`)
+projects/*/cvat/pre_annotations/
+
+# Model weights and optimizer states (large; tracked via MLflow Model Registry)
+projects/*/runs/*/best_model.pt
+projects/*/runs/*/*.pt
+projects/*/runs/*/checkpoints/
+
+# MLflow tracking (reconstructible from runs metadata)
+mlruns/
+
+# uv lock (optional; generated)
+# Comment out next line if you want a committed lockfile
+# uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Legacy POC artifacts (will be removed in plans 2-6 as scripts are migrated)
+coco_output/
 inputs/imagenes/
+training/resultados/
 
-# Data split (reproducibility - keep)
-# training/models/data_split.json
-
-# Ground truth (keep)
-# training/EAF-477-2025_ground_truth.json
+# Old cvat_projects layout (kept for reference until fully migrated)
+cvat_projects/*/images/
