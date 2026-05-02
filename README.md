@@ -68,29 +68,45 @@ docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 # Acceder en http://localhost:8080
 ```
 
-## Estructura del proyecto
+## Estructura del proyecto (post Plan 01)
 
 ```
 .
-├── README.md                          # Este archivo
-├── training/
-│   ├── EXPERIMENTS.md                 # Detalle de todos los experimentos
-│   ├── train_strategies.py            # Round 1: A, B, C, D
-│   ├── train_round2.py               # Round 2: E, F, G
-│   ├── train_round3.py               # Round 3: H, I, J, K
-│   ├── train_round4.py               # Round 4: L, M, N, O
-│   ├── reevaluate_real_map.py         # Evaluación con mAP@[0.5:0.95]
-│   ├── draw_boxes_on_pdf_v2.py        # Genera PDFs anotados sobre PDF original
-│   ├── run_docling_pipeline.py        # Pipeline Docling con monkey-patch LoRA
-│   ├── EAF-477-2025_ground_truth.json # Anotaciones COCO del dataset
-│   └── models/
-│       └── P_repeat_factor/           # Modelo ganador
-│           ├── best_model.pt          # Pesos del modelo
-│           └── history.json           # Historia de entrenamiento
-├── generate_heron_coco.py             # Inferencia Heron → COCO JSON
-├── upload_to_cvat.py                  # Sube imágenes + anotaciones a CVAT
-├── clean_overlaps_v3.py               # Limpieza de overlaps para CVAT
-└── coco_output/                       # COCO JSONs generados por inferencia
+├── README.md
+├── pyproject.toml                            # uv-managed deps
+├── projects/
+│   └── eaf/                                  # 1 carpeta por tipo de documento
+│       ├── config.yaml                       # ADN del tipo (regex, hyperparams, thresholds)
+│       ├── EXPERIMENTS.md                    # Detalle de los 16 experimentos
+│       ├── data/
+│       │   ├── pdfs/                         # PDFs source (en git)
+│       │   └── images/                       # PNGs renderizados (gitignored)
+│       ├── cvat/exports/v1_2026-03-20/       # Export COCO versionado
+│       │   ├── instances_default.json
+│       │   └── README.md
+│       ├── runs/
+│       │   └── P_repeat_factor/              # Modelo ganador (mAP 0.8700)
+│       │       └── history.json
+│       └── models/                           # production.pt symlink (lo crea Plan 5)
+├── core/                                     # código compartido entre tipos
+│   ├── labels/doclaynet_17.yaml              # 17 labels DocLayNet
+│   └── lib/config.py                         # YAML loader con !include + overrides
+├── tests/
+│   └── test_config.py                        # 8 tests del config loader
+├── training/                                 # scripts POC originales (migran en planes 02-06)
+│   ├── train_strategies.py, train_round{2,3,4}.py
+│   ├── reevaluate_real_map.py
+│   ├── draw_boxes_on_pdf{,_v2}.py
+│   └── run_docling_pipeline.py
+├── generate_heron_coco.py                    # Inferencia Heron → COCO (migra a core/predict.py)
+├── upload_to_cvat.py                         # Sube a CVAT (migra a core/cvat_sync.py)
+├── clean_overlaps_v3.py                      # Limpieza overlaps (migra a core/lib/postproc.py)
+├── scripts/
+│   ├── render_pdf_to_png.py                  # PDF → PNG (migra a core/render.py)
+│   └── restore_cvat_project4.py              # Restore one-off (migra a core/cvat_sync.py)
+└── docs/superpowers/
+    ├── specs/2026-05-02-layout-model-factory-design.md
+    └── plans/2026-05-02-plan-01-foundation.md
 ```
 
 ## Configuración de CVAT
@@ -211,4 +227,4 @@ Requiere mapear keys entre versiones de transformers (4.x vs 5.x).
 
 ## Experimentos detallados
 
-Ver [training/EXPERIMENTS.md](training/EXPERIMENTS.md) para el detalle completo de los 16 experimentos realizados.
+Ver [projects/eaf/EXPERIMENTS.md](projects/eaf/EXPERIMENTS.md) para el detalle completo de los 16 experimentos realizados.
