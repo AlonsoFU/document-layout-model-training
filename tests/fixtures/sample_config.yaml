@@ -1,0 +1,9 @@
+project:
+  slug: testdoc
+  display_name: "Test Doc"
+labels: !include sample_labels.yaml
+training:
+  lora:
+    rank: 32
+    alpha: 64
+  lr: 1.0e-4
