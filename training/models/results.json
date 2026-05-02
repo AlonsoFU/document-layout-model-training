@@ -1,7 +1,0 @@
-{
-  "baseline": 0.8693571585419413,
-  "A_frozen_decoder": 0.7694025008132166,
-  "B_lora": 0.9244039643025446,
-  "C_progressive": "FAILED: some parameters appear in more than one parameter group",
-  "D_full_finetune": "FAILED: boxes1 must be in [x0, y0, x1, y1] (corner) format, but got tensor([[nan, nan, nan, nan],\n        [nan, nan, nan, nan],\n        [nan, nan, nan, nan],\n        ...,\n        [nan, nan, nan, nan],\n        [nan, nan, nan, nan],\n        [nan, nan, nan, nan]], device='cuda:0')"
-}
