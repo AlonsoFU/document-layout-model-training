@@ -1,3 +1,14 @@
+> ⚠️ **Repo en migración a Layout Model Factory.** El diseño objetivo está en
+> [`docs/superpowers/specs/2026-05-02-layout-model-factory-design.md`](docs/superpowers/specs/2026-05-02-layout-model-factory-design.md).
+> El plan de migración por fases está en [`docs/superpowers/plans/`](docs/superpowers/plans/).
+>
+> **Estado actual (Plan 01 completado):** estructura `projects/eaf/` y `core/lib/config.py` listos.
+> Los scripts originales (`generate_heron_coco.py`, `upload_to_cvat.py`,
+> `clean_overlaps_v3.py`, `training/train_round*.py`, etc.) **siguen funcionando**
+> y se migrarán en planes 02-06.
+
+---
+
 # docling-layout-fine-tuning
 
 Fine-tuning del modelo [Docling Layout Heron](https://huggingface.co/docling-project/docling-layout-heron) (RT-DETR v2) para detección de layout en documentos tipo EAF (Estudios de Áreas de Influencia), usando CVAT para anotación y LoRA para entrenamiento eficiente.
