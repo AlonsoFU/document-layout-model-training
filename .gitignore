@@ -30,6 +30,10 @@ coco_output/
 __pycache__/
 *.pyc
 
+# Rendered PNGs (regenerate from data/pdfs via scripts/render_pdf_to_png.py)
+cvat_projects/*/images/
+inputs/imagenes/
+
 # Data split (reproducibility - keep)
 # training/models/data_split.json
 
