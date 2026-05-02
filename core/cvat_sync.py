@@ -100,12 +100,14 @@ def push(project_slug: str, coco_path: str | None = None) -> None:
             print(f"[push] annotations already present, skip")
             continue
         task_filenames = {p.name for p in pngs}
-        # Detect if this task uses the _1 suffix in the COCO (project-level merge artefact)
-        suffix_pattern = re.compile(r"^.*_1\.png$")
-        task_has_suffix_in_coco = any(
-            suffix_pattern.match(img["file_name"])
-            and img["file_name"].rsplit("_1", 1)[0] + ".png" in task_filenames
-            for img in coco["images"]
+        # Detect if this task uses the _1 suffix in the COCO (project-level merge artefact).
+        # strip_suffix should be True only when ALL task filenames appear in the COCO as
+        # "pagina-NNN_1.png" (not "pagina-NNN.png").  A partial overlap — where only some
+        # pages share names with another task — must not trigger suffix stripping.
+        coco_filenames = {img["file_name"] for img in coco["images"]}
+        stems = [fn[:-4] for fn in task_filenames if fn.endswith(".png")]
+        task_has_suffix_in_coco = bool(stems) and all(
+            stem + "_1.png" in coco_filenames for stem in stems
         )
         task_coco = _filter_coco_for_task(
             coco, image_filenames=task_filenames, strip_suffix=task_has_suffix_in_coco

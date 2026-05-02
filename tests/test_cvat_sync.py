@@ -100,3 +100,75 @@ def test_filter_coco_for_task_renumbers_ids_and_strips_suffix():
     assert len(out2["images"]) == 2
     names = {i["file_name"] for i in out2["images"]}
     assert names == {"pagina-001.png", "pagina-002.png"}
+
+
+# --- Pull / version tests --------------------------------------------------
+
+import io as _io
+import json as _json
+import zipfile as _zipfile
+
+from core.cvat_sync import _next_version, pull
+
+
+def test_next_version_first_export(tmp_path):
+    assert _next_version(tmp_path / "no_such_dir").startswith("v1_")
+
+
+def test_next_version_increments(tmp_path):
+    (tmp_path / "v1_2026-03-20").mkdir()
+    (tmp_path / "v2_2026-04-15").mkdir()
+    out = _next_version(tmp_path)
+    assert out.startswith("v3_")
+
+
+def test_next_version_ignores_non_v_dirs(tmp_path):
+    (tmp_path / "v1_2026-03-20").mkdir()
+    (tmp_path / "scratch").mkdir()
+    out = _next_version(tmp_path)
+    assert out.startswith("v2_")
+
+
+def test_pull_writes_instances_default_json(fake_project, monkeypatch):
+    # Build a fake export ZIP containing annotations/instances_default.json
+    fake_coco = {
+        "info": {},
+        "licenses": [],
+        "categories": [{"id": 1, "name": "A"}],
+        "images": [{"id": 1, "file_name": "p.png", "width": 1, "height": 1}],
+        "annotations": [],
+    }
+    buf = _io.BytesIO()
+    with _zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("annotations/instances_default.json", _json.dumps(fake_coco))
+    zip_bytes = buf.getvalue()
+
+    client = MagicMock()
+    client.get_project_by_name.return_value = {"id": 42, "name": "Test Project"}
+    client.export_dataset.return_value = zip_bytes
+    monkeypatch.setattr("core.cvat_sync._build_client", lambda cfg: client)
+
+    pull("test", version="v1_2026-05-02")
+
+    out = fake_project / "cvat" / "exports" / "v1_2026-05-02" / "instances_default.json"
+    assert out.exists()
+    loaded = _json.loads(out.read_text())
+    assert loaded["categories"][0]["name"] == "A"
+
+
+def test_pull_raises_if_project_not_found(fake_project, monkeypatch):
+    client = MagicMock()
+    client.get_project_by_name.return_value = None
+    monkeypatch.setattr("core.cvat_sync._build_client", lambda cfg: client)
+    with pytest.raises(RuntimeError, match="not found"):
+        pull("test")
+
+
+def test_pull_raises_if_version_dir_exists(fake_project, monkeypatch):
+    out_dir = fake_project / "cvat" / "exports" / "v1_2026-05-02"
+    out_dir.mkdir(parents=True)
+    client = MagicMock()
+    client.get_project_by_name.return_value = {"id": 42}
+    monkeypatch.setattr("core.cvat_sync._build_client", lambda cfg: client)
+    with pytest.raises(FileExistsError):
+        pull("test", version="v1_2026-05-02")
