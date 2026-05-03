@@ -41,6 +41,8 @@ def test_cli_predict_help_mentions_required_flags():
     assert "--pre-annotate" in result.stdout
     assert "--threshold" in result.stdout
     assert "--limit" in result.stdout
+    assert "--pdf" in result.stdout
+    assert "--output" in result.stdout
 
 
 def test_cli_train_help_mentions_required_flags():

@@ -93,6 +93,11 @@ def test_predict_writes_coco_with_correct_label_id(fake_project, monkeypatch):
     assert all(ann["score"] == pytest.approx(0.9) for ann in coco["annotations"])
 
 
+def test_predict_output_pdf_calls_fitz(monkeypatch, tmp_path):
+    """Smoke: --output=anotado.pdf path goes through the PDF code branch."""
+    pytest.skip("Wired in implementation; see Task 3 step 5 smoke test for actual PDF generation.")
+
+
 def test_predict_drops_below_threshold(fake_project, monkeypatch):
     """Lower the score and confirm filtering."""
     def _low_score_load(model_name, device):

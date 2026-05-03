@@ -76,19 +76,36 @@ def predict_cmd(
         "--pre-annotate",
         help="Generate COCO predictions to projects/<slug>/cvat/pre_annotations/<timestamp>.json.",
     ),
+    pdf: str = typer.Option(
+        None,
+        "--pdf",
+        help="Source PDF path. Required when --output ends in .pdf.",
+    ),
+    output: str = typer.Option(
+        None,
+        "--output",
+        help="Output path. Use a .pdf extension to produce a visualized annotated PDF.",
+    ),
     threshold: float = typer.Option(
         None, "--threshold", help="Override the default confidence threshold."
     ),
     limit: int = typer.Option(
-        None, "--limit", help="Cap the number of images (smoke testing)."
+        None, "--limit", help="Cap the number of pages/images (smoke testing)."
     ),
 ) -> None:
-    """Run the Heron baseline (or, in later plans, a fine-tuned model) over the project's images."""
-    if not pre_annotate:
-        raise typer.BadParameter("must pass --pre-annotate (other modes added in later plans)")
-    from core.predict import predict
+    """Run inference: pre-annotate a project's images OR draw boxes on a single PDF."""
+    if output and output.endswith(".pdf"):
+        if not pdf:
+            raise typer.BadParameter("--output=*.pdf requires --pdf=<source.pdf>")
+        from core.predict import predict_pdf
 
-    predict(project, mode="pre-annotate", threshold=threshold, limit=limit)
+        predict_pdf(project, pdf_path=pdf, output_path=output, threshold=threshold, limit=limit)
+    elif pre_annotate:
+        from core.predict import predict
+
+        predict(project, mode="pre-annotate", threshold=threshold, limit=limit)
+    else:
+        raise typer.BadParameter("either --pre-annotate or --output=*.pdf must be passed")
 
 
 if __name__ == "__main__":
