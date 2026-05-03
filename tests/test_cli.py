@@ -13,6 +13,7 @@ def test_cli_help_lists_subcommands():
     assert "cvat-push" in result.stdout
     assert "cvat-pull" in result.stdout
     assert "predict" in result.stdout
+    assert "train" in result.stdout
 
 
 def test_cli_render_help_mentions_project_flag():
@@ -40,3 +41,11 @@ def test_cli_predict_help_mentions_required_flags():
     assert "--pre-annotate" in result.stdout
     assert "--threshold" in result.stdout
     assert "--limit" in result.stdout
+
+
+def test_cli_train_help_mentions_required_flags():
+    result = runner.invoke(app, ["train", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+    assert "--run" in result.stdout
+    assert "--override" in result.stdout

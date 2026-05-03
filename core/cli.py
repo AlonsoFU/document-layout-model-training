@@ -54,6 +54,20 @@ def cvat_pull_cmd(
     pull(project, version=version)
 
 
+@app.command(name="train")
+def train_cmd(
+    project: str = typer.Option(..., "--project", "-p", help="Project slug."),
+    run: str = typer.Option(..., "--run", "-r", help="Run name (becomes the dir under projects/<slug>/runs/)."),
+    override: list[str] = typer.Option(
+        None, "--override", "-o", help="Hyperparameter override KEY=VALUE (e.g. training.lora.rank=64). Repeatable."
+    ),
+) -> None:
+    """Fine-tune the project's layout model (LoRA on Heron) and log to MLflow."""
+    from core.train import train
+
+    train(project, run_name=run, overrides=list(override or []))
+
+
 @app.command(name="predict")
 def predict_cmd(
     project: str = typer.Option(..., "--project", "-p", help="Project slug."),
