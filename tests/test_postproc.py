@@ -133,14 +133,13 @@ def test_kill_wrappers_preserves_box_with_single_child():
 # ---- Crop -----------------------------------------------------------------
 
 def test_crop_box_picks_largest_remaining_rectangle():
-    # to_crop is wider; fixed sits in the middle vertically — crop top OR bottom
+    # to_crop=(0,0,100,100); fixed=(40,30,60,70).
+    # The 4 candidate strips: top (3000), bottom (3000), left (4000), right (4000).
+    # Result must be one of the two 4000-area strips.
     cropped = crop_box((0, 0, 100, 100), (40, 30, 60, 70))
-    # Expect either top portion or bottom portion (whichever is larger; both are 30 tall)
     assert cropped is not None
-    x1, y1, x2, y2 = cropped
-    assert x1 == 0 and x2 == 100
-    # Either the top (0,0..100,30) or the bottom (0,70..100,100): areas equal
-    assert (y1, y2) in {(0, 30), (70, 100), (0, 30), (70, 100)}
+    expected = {(0, 0, 40, 100), (60, 0, 100, 100)}
+    assert cropped in expected
 
 
 def test_crop_box_returns_none_when_remainder_too_small():

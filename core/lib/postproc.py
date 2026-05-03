@@ -140,13 +140,15 @@ def crop_box(to_crop: Box, fixed: Box) -> Box | None:
     if original_area <= 0:
         return None
 
-    # Only consider horizontal (top/bottom) splits. Document-layout boxes span
-    # the full column width; a side-strip crop would produce an oddly narrow box.
     candidates: list[Box] = []
     if fy2 < y2:
-        candidates.append((x1, fy2, x2, y2))
+        candidates.append((x1, fy2, x2, y2))      # bottom strip
     if fy1 > y1:
-        candidates.append((x1, y1, x2, fy1))
+        candidates.append((x1, y1, x2, fy1))      # top strip
+    if fx2 < x2:
+        candidates.append((fx2, y1, x2, y2))      # right strip
+    if fx1 > x1:
+        candidates.append((x1, y1, fx1, y2))      # left strip
 
     if not candidates:
         return None
