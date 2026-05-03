@@ -89,15 +89,33 @@ def train(project_slug: str, run_name: str, overrides: list[str] | None = None) 
     with open(coco_path) as f:
         coco = json.load(f)
 
-    # Build per-task image_ids: ids are project-level. Filter by file_name → which images-dir contains them.
+    # Build per-task image_ids: ids are project-level. Resolve each COCO file_name
+    # to a real path on disk. Project-level COCOs disambiguate same-named images
+    # across tasks by suffixing `_N` (e.g. pagina-001_1.png belongs to the second
+    # task's pagina-001.png). The on-disk files keep their per-task name unchanged.
+    import re as _re
     images_root = project_dir / "data" / "images"
-    image_dir_for: dict[int, Path] = {}
+    subdirs = sorted(d for d in images_root.iterdir() if d.is_dir())
+    name_to_paths: dict[str, list[Path]] = {}
+    for sub in subdirs:
+        for png in sorted(sub.glob("*.png")):
+            name_to_paths.setdefault(png.name, []).append(png)
+
+    image_path_for: dict[int, Path] = {}
     for img in coco["images"]:
-        for sub in images_root.iterdir():
-            if sub.is_dir() and (sub / img["file_name"]).exists():
-                image_dir_for[img["id"]] = sub
-                break
-    valid_ids = sorted(image_dir_for.keys())
+        fname = img["file_name"]
+        m = _re.match(r"^(.+)_(\d+)(\.[^.]+)$", fname)
+        if m:
+            base = m.group(1) + m.group(3)
+            occurrence = int(m.group(2))  # 1, 2, ... → second/third occurrence
+        else:
+            base = fname
+            occurrence = 0  # 0 → first occurrence
+        candidates = name_to_paths.get(base, [])
+        if occurrence < len(candidates):
+            image_path_for[img["id"]] = candidates[occurrence]
+
+    valid_ids = sorted(image_path_for.keys())
     if not valid_ids:
         raise FileNotFoundError(f"no COCO image_ids matched files under {images_root}")
 
@@ -121,8 +139,8 @@ def train(project_slug: str, run_name: str, overrides: list[str] | None = None) 
     flat_dir.mkdir(parents=True, exist_ok=True)
     for iid in valid_ids:
         info = next(i for i in coco["images"] if i["id"] == iid)
-        target = flat_dir / info["file_name"]
-        src = image_dir_for[iid] / info["file_name"]
+        target = flat_dir / info["file_name"]  # keeps the _N suffix from COCO
+        src = image_path_for[iid]
         if not target.exists():
             try:
                 target.symlink_to(src.resolve())
