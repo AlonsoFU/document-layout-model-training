@@ -63,7 +63,7 @@ def train(project_slug: str, run_name: str, overrides: list[str] | None = None) 
         collate_fn,
     )
     from core.lib.eval import compute_map
-    from core.lib.model import apply_lora, lora_state_dict
+    from core.lib.model import MODEL_INDEX_TO_LABEL_NAME, apply_lora, lora_state_dict
     from core.lib.tracking import MlflowRun
 
     project_dir = PROJECTS_ROOT / project_slug
@@ -150,8 +150,20 @@ def train(project_slug: str, run_name: str, overrides: list[str] | None = None) 
 
     processor = RTDetrImageProcessor.from_pretrained(tcfg["base_model"])
     augmenter = DocumentAugmenter()
-    train_ds = CocoDocDataset(coco_path, flat_dir, train_ids, processor=processor, augmenter=augmenter)
-    val_ds = CocoDocDataset(coco_path, flat_dir, val_ids, processor=processor, augmenter=None)
+
+    # Build category remap: COCO cat_id (project-specific order) -> model 0-based
+    # index (DocLayNet native order). Heron's classifier head was pre-trained with
+    # MODEL_INDEX_TO_LABEL_NAME, so passing labels in any other order forces the
+    # model to relearn the mapping (slower convergence, lower final mAP).
+    name_to_model_idx = {n: i for i, n in enumerate(MODEL_INDEX_TO_LABEL_NAME)}
+    category_remap: dict[int, int] = {}
+    for cat in coco["categories"]:
+        if cat["name"] in name_to_model_idx:
+            category_remap[cat["id"]] = name_to_model_idx[cat["name"]]
+    print(f"[train] category remap (COCO cat_id -> model idx): {category_remap}")
+
+    train_ds = CocoDocDataset(coco_path, flat_dir, train_ids, processor=processor, augmenter=augmenter, category_remap=category_remap)
+    val_ds = CocoDocDataset(coco_path, flat_dir, val_ids, processor=processor, augmenter=None, category_remap=category_remap)
 
     # Repeat Factor Sampling.
     sampler_cfg = tcfg.get("sampling", {})

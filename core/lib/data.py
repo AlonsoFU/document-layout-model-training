@@ -30,10 +30,21 @@ class CocoDocDataset(Dataset):
         image_ids: list[int],
         processor=None,
         augmenter=None,
+        category_remap: dict[int, int] | None = None,
     ):
+        """
+        Args:
+            category_remap: Optional mapping from COCO category_id (1-based) to
+                model class index (0-based). When training Heron whose pre-training
+                used DocLayNet's native class order, but the project's COCO uses
+                a different order (e.g. CVAT 1-based), pass a remap so that
+                ann.category_id N -> remap[N] = the index Heron's classifier head
+                actually represents. If None, defaults to (category_id - 1).
+        """
         self.images_dir = Path(images_dir)
         self.processor = processor
         self.augmenter = augmenter
+        self.category_remap = category_remap
 
         with open(coco_path) as f:
             coco = json.load(f)
@@ -64,7 +75,11 @@ class CocoDocDataset(Dataset):
         for ann in anns:
             x, y, w, h = ann["bbox"]
             boxes.append([(x + w / 2) / iw, (y + h / 2) / ih, w / iw, h / ih])
-            labels.append(ann["category_id"] - 1)  # 0-based
+            cat_id = ann["category_id"]
+            if self.category_remap is not None:
+                labels.append(self.category_remap[cat_id])
+            else:
+                labels.append(cat_id - 1)  # default: COCO 1-based -> model 0-based
         if self.augmenter and boxes:
             image, boxes = self.augmenter(image, boxes)
         target = {
