@@ -4,8 +4,10 @@ version = "0.1.0"
 description = "Document Layout Model Factory"
 requires-python = ">=3.11"
 dependencies = [
-    "torch>=2.0",
-    "torchvision>=0.15",
+    # torch/torchvision pinned to versions with CUDA 11.8 wheels (sm_6.1 support
+    # for the GTX 1080). See [tool.uv.sources] below.
+    "torch==2.5.1",
+    "torchvision==0.20.1",
     "transformers>=4.40",
     "Pillow>=10.0",
     "PyMuPDF>=1.23",
@@ -39,3 +41,14 @@ packages = ["core"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+
+# torch/torchvision are fetched from the PyTorch CUDA 11.8 index (the
+# default PyPI wheels are built for sm_7.5+ and don't run on the GTX 1080).
+[tool.uv.sources]
+torch = { index = "pytorch-cu118" }
+torchvision = { index = "pytorch-cu118" }
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true
