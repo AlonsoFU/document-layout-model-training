@@ -28,3 +28,56 @@ def test_label_name_for_index_raises_on_out_of_range():
         label_name_for_index(17)
     with pytest.raises(IndexError):
         label_name_for_index(-1)
+
+
+def test_apply_lora_replaces_target_linears():
+    """Smoke: build a tiny model with named linears matching the patterns and confirm they're replaced."""
+    import torch
+    from core.lib.model import LoRALinear, apply_lora
+
+    class FakeAttention(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.q_proj = torch.nn.Linear(10, 10)
+            self.k_proj = torch.nn.Linear(10, 10)
+            self.v_proj = torch.nn.Linear(10, 10)
+            self.unrelated = torch.nn.Linear(10, 10)
+
+    class FakeModel(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.decoder = torch.nn.ModuleList([FakeAttention()])
+
+    model = FakeModel()
+    apply_lora(model, rank=4, alpha=8, target_substrings=["q_proj", "k_proj", "v_proj"])
+
+    decoder_layer = model.decoder[0]
+    assert isinstance(decoder_layer.q_proj, LoRALinear)
+    assert isinstance(decoder_layer.k_proj, LoRALinear)
+    assert isinstance(decoder_layer.v_proj, LoRALinear)
+    # unrelated should not be wrapped
+    assert not isinstance(decoder_layer.unrelated, LoRALinear)
+
+
+def test_lora_state_dict_extracts_only_lora_weights():
+    import torch
+    from core.lib.model import LoRALinear, apply_lora, lora_state_dict
+
+    class FakeAttention(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.q_proj = torch.nn.Linear(10, 10)
+
+    class FakeModel(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.decoder = torch.nn.ModuleList([FakeAttention()])
+
+    model = FakeModel()
+    apply_lora(model, rank=4, alpha=8, target_substrings=["q_proj"])
+    sd = lora_state_dict(model)
+    # Should have lora_A and lora_B for the wrapped layer
+    assert any("lora_A" in k for k in sd.keys())
+    assert any("lora_B" in k for k in sd.keys())
+    # Should NOT have the original weights
+    assert not any("original.weight" in k for k in sd.keys())
