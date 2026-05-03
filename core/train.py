@@ -68,6 +68,8 @@ def train(project_slug: str, run_name: str, overrides: list[str] | None = None) 
 
     project_dir = PROJECTS_ROOT / project_slug
     cfg = load_config(project_dir / "config.yaml")
+    # Pre-populate optional knobs so apply_overrides accepts them as "known" keys.
+    cfg.setdefault("training", {}).setdefault("limit", None)
     if overrides:
         cfg = apply_overrides(cfg, overrides)
 

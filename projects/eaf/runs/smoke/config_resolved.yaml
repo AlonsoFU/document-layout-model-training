@@ -1,0 +1,74 @@
+classification:
+  filename_regex: ^EAF[-_]\d+[-_]\d{4}\.pdf$
+  ollama_fallback:
+    enabled: true
+    model: qwen2.5:7b
+    prompt: "\xBFEs un Estudio de An\xE1lisis de Falla del CEN? Responde solo 'yes'\
+      \ o 'no'."
+cvat:
+  project_name: Docling Heron CLEAN - EAF
+  url: http://localhost:8080
+evaluation:
+  metric: mAP@[0.5:0.95]
+  random_seed: 42
+  val_split: 0.15
+labels:
+- Document Index
+- List-item
+- Footnote
+- Checkbox-selected
+- Page-header
+- Checkbox-unselected
+- Code
+- Table
+- Text
+- Section-header
+- Formula
+- Picture
+- Key-value-region
+- Caption
+- Title
+- Form
+- Page-footer
+postprocess:
+  cross_cat_iou: 0.3
+  full_page_picture_filter: 0.9
+  nms_iou: 0.5
+  thresholds:
+    Code: 0.45
+    Section-header: 0.45
+    Title: 0.45
+    default: 0.5
+project:
+  display_name: "Estudios de An\xE1lisis de Falla (CEN)"
+  slug: eaf
+render:
+  dpi: 300
+training:
+  augmentation:
+    color_jitter: true
+    gaussian_blur: true
+    rotation_degrees: 3
+  base_model: docling-project/docling-layout-heron
+  batch_size: 1
+  early_stop_patience: 99
+  gradient_accumulation: 4
+  gradient_clip: 0.1
+  limit: 50
+  lora:
+    alpha: 64
+    dropout: 0.05
+    rank: 32
+    target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+  lr: 0.0001
+  lr_schedule: cosine
+  max_epochs: 2
+  optimizer: AdamW
+  sampling:
+    method: repeat_factor
+    threshold: 0.5
+  warmup_epochs: 5
+  weight_decay: 0.0001
