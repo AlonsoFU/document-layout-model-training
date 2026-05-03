@@ -108,5 +108,25 @@ def predict_cmd(
         raise typer.BadParameter("either --pre-annotate or --output=*.pdf must be passed")
 
 
+@app.command(name="evaluate")
+def evaluate_cmd(
+    project: str = typer.Option(..., "--project", "-p"),
+    run: str = typer.Option(..., "--run", "-r"),
+) -> None:
+    """Re-evaluate a saved run, with per-PDF breakdown."""
+    from core.evaluate import evaluate
+    evaluate(project, run)
+
+
+@app.command(name="promote")
+def promote_cmd(
+    project: str = typer.Option(..., "--project", "-p"),
+    run: str = typer.Option(..., "--run", "-r"),
+) -> None:
+    """Promote a saved run to production (symlink + MLflow registry)."""
+    from core.promote import promote
+    promote(project, run)
+
+
 if __name__ == "__main__":
     app()
