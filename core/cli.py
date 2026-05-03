@@ -54,5 +54,28 @@ def cvat_pull_cmd(
     pull(project, version=version)
 
 
+@app.command(name="predict")
+def predict_cmd(
+    project: str = typer.Option(..., "--project", "-p", help="Project slug."),
+    pre_annotate: bool = typer.Option(
+        False,
+        "--pre-annotate",
+        help="Generate COCO predictions to projects/<slug>/cvat/pre_annotations/<timestamp>.json.",
+    ),
+    threshold: float = typer.Option(
+        None, "--threshold", help="Override the default confidence threshold."
+    ),
+    limit: int = typer.Option(
+        None, "--limit", help="Cap the number of images (smoke testing)."
+    ),
+) -> None:
+    """Run the Heron baseline (or, in later plans, a fine-tuned model) over the project's images."""
+    if not pre_annotate:
+        raise typer.BadParameter("must pass --pre-annotate (other modes added in later plans)")
+    from core.predict import predict
+
+    predict(project, mode="pre-annotate", threshold=threshold, limit=limit)
+
+
 if __name__ == "__main__":
     app()
