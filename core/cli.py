@@ -128,5 +128,26 @@ def promote_cmd(
     promote(project, run)
 
 
+@app.command(name="classify")
+def classify_cmd(
+    pdf: str = typer.Option(..., "--pdf", help="Path to a PDF to classify."),
+) -> None:
+    """Auto-detect which project a PDF belongs to (regex + Ollama fallback)."""
+    from core.classify_doctype import classify
+
+    slug = classify(pdf)
+    print(slug)
+
+
+@app.command(name="init-project")
+def init_project_cmd(
+    slug: str = typer.Option(..., "--slug", help="Slug for the new project (e.g. 'contracts')."),
+) -> None:
+    """Scaffold a new projects/<slug>/ directory with a config.yaml template."""
+    from core.init_project import init_project
+
+    init_project(slug)
+
+
 if __name__ == "__main__":
     app()

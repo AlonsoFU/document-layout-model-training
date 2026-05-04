@@ -16,6 +16,8 @@ def test_cli_help_lists_subcommands():
     assert "train" in result.stdout
     assert "evaluate" in result.stdout
     assert "promote" in result.stdout
+    assert "classify" in result.stdout
+    assert "init-project" in result.stdout
 
 
 def test_cli_render_help_mentions_project_flag():
@@ -67,3 +69,15 @@ def test_cli_promote_help_mentions_required_flags():
     assert result.exit_code == 0
     assert "--project" in result.stdout
     assert "--run" in result.stdout
+
+
+def test_cli_classify_help_mentions_pdf_flag():
+    result = runner.invoke(app, ["classify", "--help"])
+    assert result.exit_code == 0
+    assert "--pdf" in result.stdout
+
+
+def test_cli_init_project_help_mentions_slug_flag():
+    result = runner.invoke(app, ["init-project", "--help"])
+    assert result.exit_code == 0
+    assert "--slug" in result.stdout
