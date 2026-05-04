@@ -22,6 +22,11 @@ projects/*/runs/*/checkpoints/
 
 # MLflow tracking (reconstructible from runs metadata)
 mlruns/
+mlflow.db
+mlflow.db-*
+
+# Per-run flat-symlink staging dirs created by core.train / core.evaluate
+projects/*/runs/*/_flat_images/
 
 # uv lock (optional; generated)
 # Comment out next line if you want a committed lockfile
@@ -32,11 +37,3 @@ mlruns/
 .vscode/
 *.swp
 .DS_Store
-
-# Legacy POC artifacts (will be removed in plans 2-6 as scripts are migrated)
-coco_output/
-inputs/imagenes/
-training/resultados/
-
-# Old cvat_projects layout (kept for reference until fully migrated)
-cvat_projects/*/images/
