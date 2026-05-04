@@ -1,41 +1,39 @@
-# Models (too large for git, except winner)
-training/models/A_*/
-training/models/B_*/
-training/models/C_*/
-training/models/D_*/
-training/models/E_*/
-training/models/F_*/
-training/models/G_*/
-training/models/H_*/
-training/models/I_*/
-training/models/J_*/
-training/models/K_*/
-training/models/L_*/
-training/models/M_*/
-training/models/N_*/
-training/models/O_*/
-# Keep P (winner): training/models/P_repeat_factor/
-
-# All model weights
-training/models/*/best_model.pt
-training/models/*/*.pt
-
-# Results PDFs
-training/resultados/
-
-# COCO outputs
-coco_output/
-
-# Python cache
+# Python
 __pycache__/
 *.pyc
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Rendered PNGs (regenerate from data/pdfs via scripts/render_pdf_to_png.py)
-cvat_projects/*/images/
-inputs/imagenes/
+# Virtualenv
+.venv/
 
-# Data split (reproducibility - keep)
-# training/models/data_split.json
+# Rendered PNGs (regenerable from data/pdfs/ via `dlmf render`)
+projects/*/data/images/
 
-# Ground truth (keep)
-# training/EAF-477-2025_ground_truth.json
+# CVAT pre-annotations (regenerable via `dlmf predict --pre-annotate`)
+projects/*/cvat/pre_annotations/
+
+# Model weights and optimizer states (large; tracked via MLflow Model Registry)
+projects/*/runs/*/best_model.pt
+projects/*/runs/*/*.pt
+projects/*/runs/*/checkpoints/
+
+# MLflow tracking (reconstructible from runs metadata)
+mlruns/
+mlflow.db
+mlflow.db-*
+
+# Per-run flat-symlink staging dirs created by core.train / core.evaluate
+projects/*/runs/*/_flat_images/
+
+# uv lock (optional; generated)
+# Comment out next line if you want a committed lockfile
+# uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store

@@ -1,0 +1,63 @@
+project:
+  slug: eaf
+  display_name: "Estudios de Análisis de Falla (CEN)"
+
+# Identificación automática del tipo de documento (regex + Ollama fallback)
+classification:
+  filename_regex: "^EAF[-_]\\d+[-_]\\d{4}\\.pdf$"
+  ollama_fallback:
+    enabled: true
+    model: "qwen2.5:7b"
+    prompt: "¿Es un Estudio de Análisis de Falla del CEN? Responde solo 'yes' o 'no'."
+
+render:
+  dpi: 300
+
+cvat:
+  project_name: "Docling Heron CLEAN - EAF"
+  url: "http://localhost:8080"
+
+# Labels: 17 fijos de DocLayNet (Opción A del spec)
+labels: !include ../../core/labels/doclaynet_17.yaml
+
+# Hyperparámetros DEFAULT — cada run puede overridear via CLI
+training:
+  base_model: "docling-project/docling-layout-heron"
+  lora:
+    rank: 32
+    alpha: 64
+    dropout: 0.05
+    target_modules: [q_proj, k_proj, v_proj]
+  optimizer: AdamW
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  lr_schedule: cosine
+  warmup_epochs: 5
+  batch_size: 1
+  gradient_accumulation: 4
+  gradient_clip: 0.1
+  max_epochs: 50
+  early_stop_patience: 10
+  sampling:
+    method: repeat_factor
+    threshold: 0.5
+  augmentation:
+    color_jitter: true
+    rotation_degrees: 3
+    gaussian_blur: true
+
+# Post-procesamiento de inferencia
+postprocess:
+  thresholds:
+    default: 0.5
+    Section-header: 0.45
+    Title: 0.45
+    Code: 0.45
+  nms_iou: 0.5
+  cross_cat_iou: 0.3
+  full_page_picture_filter: 0.9
+
+evaluation:
+  metric: "mAP@[0.5:0.95]"
+  val_split: 0.15
+  random_seed: 42

@@ -1,7 +1,0 @@
-{
-  "E_lora32_cosine_aug (ref)": 0.9562,
-  "H_lora64_cosine_aug": 0.9441512394862037,
-  "I_lora32_lr5e5": 0.8520477710049905,
-  "J_lora32_all_linears": 0.8454197560384176,
-  "K_lora32_warmup10": 0.9428951173347727
-}

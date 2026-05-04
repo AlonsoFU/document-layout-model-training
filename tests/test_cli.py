@@ -1,0 +1,83 @@
+"""Tests for the dlmf Typer CLI."""
+from typer.testing import CliRunner
+
+from core.cli import app
+
+runner = CliRunner()
+
+
+def test_cli_help_lists_subcommands():
+    result = runner.invoke(app, ["--help"])
+    assert result.exit_code == 0
+    assert "render" in result.stdout
+    assert "cvat-push" in result.stdout
+    assert "cvat-pull" in result.stdout
+    assert "predict" in result.stdout
+    assert "train" in result.stdout
+    assert "evaluate" in result.stdout
+    assert "promote" in result.stdout
+    assert "classify" in result.stdout
+    assert "init-project" in result.stdout
+
+
+def test_cli_render_help_mentions_project_flag():
+    result = runner.invoke(app, ["render", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+
+
+def test_cli_cvat_push_help_mentions_project_flag():
+    result = runner.invoke(app, ["cvat-push", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+
+
+def test_cli_cvat_pull_help_mentions_project_flag():
+    result = runner.invoke(app, ["cvat-pull", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+
+
+def test_cli_predict_help_mentions_required_flags():
+    result = runner.invoke(app, ["predict", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+    assert "--pre-annotate" in result.stdout
+    assert "--threshold" in result.stdout
+    assert "--limit" in result.stdout
+    assert "--pdf" in result.stdout
+    assert "--output" in result.stdout
+
+
+def test_cli_train_help_mentions_required_flags():
+    result = runner.invoke(app, ["train", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+    assert "--run" in result.stdout
+    assert "--override" in result.stdout
+
+
+def test_cli_evaluate_help_mentions_required_flags():
+    result = runner.invoke(app, ["evaluate", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+    assert "--run" in result.stdout
+
+
+def test_cli_promote_help_mentions_required_flags():
+    result = runner.invoke(app, ["promote", "--help"])
+    assert result.exit_code == 0
+    assert "--project" in result.stdout
+    assert "--run" in result.stdout
+
+
+def test_cli_classify_help_mentions_pdf_flag():
+    result = runner.invoke(app, ["classify", "--help"])
+    assert result.exit_code == 0
+    assert "--pdf" in result.stdout
+
+
+def test_cli_init_project_help_mentions_slug_flag():
+    result = runner.invoke(app, ["init-project", "--help"])
+    assert result.exit_code == 0
+    assert "--slug" in result.stdout
